@@ -157,7 +157,8 @@ void WikipediaActivity::onEnter() {
     }
     go(View::Search);
   } else {
-    enterInstall();
+    showNotice("NO WIKIPEDIA PACK", "Copy the CrossPlay pack to /wikipedia on the SD card.", "INSTALL",
+               wikiui::ActionInstall);
   }
 }
 
@@ -721,7 +722,9 @@ void WikipediaActivity::routeAction(const int action, const int value) {
       enterInstall();
       return;
     case wikiui::ActionBack:
-      if (section_) {
+      if (!packOpen_) {
+        shelf::leave(renderer, mappedInput);
+      } else if (section_) {
         go(View::Article);
       } else {
         go(View::Search);

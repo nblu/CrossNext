@@ -48,6 +48,7 @@
 #include "toybattle/ToyBattleActivity.h"
 #include "ui/GameMenuIcons.h"
 #include "ui/NavigationIcons.h"
+#include "ui/ToyboxIcons.h"
 #include "wallpapers/WallpapersActivity.h"
 #include "wikipedia/WikipediaActivity.h"
 #include "wordle/WordleActivity.h"
@@ -91,6 +92,8 @@ constexpr shelf::Item kApps[] = {
     {"COUNTER", &navicons::Counter32, &ToolsActivity::counter},
     {"FOCUS", &navicons::Focus32, &FocusActivity::create},
     {"CALCULATOR", &navicons::Calculator32, &CalculatorActivity::create},
+    {"XKCD", &icon_xkcd_32, &XkcdActivity::create},
+    {"WIKIPEDIA", &icon_wikipedia_32, &WikipediaActivity::create},
 };
 
 // The two rows Home grows, in reading order. Titles are Title Case because
