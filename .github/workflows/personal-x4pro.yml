@@ -1,0 +1,36 @@
+name: Personal X4 Pro firmware
+on:
+  push:
+    branches: [enable-xkcd-wikipedia]
+permissions:
+  contents: read
+jobs:
+  firmware:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 3
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install pioarduino==6.1.19 littlefs-python fatfs-ng pyyaml rich-click zopfli intelhex rich cryptography ecdsa bitstring 'reedsolo<1.8' esp-idf-size esp-coredump
+      - name: Build and measure
+        run: |
+          set -eu
+          mkdir -p "$RUNNER_TEMP/output"
+          for revision in cff0f52361a2683f0be57094e467fe491c3ebe68 "$GITHUB_SHA"; do
+            git checkout --detach "$revision"
+            pio run -e gh_release_x4pro
+            image=.pio/build/gh_release_x4pro/firmware.bin
+            bytes=$(stat -c%s "$image")
+            echo "$revision $bytes bytes, $((0x7f0000-bytes)) bytes free" >> "$GITHUB_STEP_SUMMARY"
+          done
+          cp "$image" "$RUNNER_TEMP/output/CrossNext-X4Pro-2.0.7-xkcd-wikipedia.bin"
+          cd "$RUNNER_TEMP/output"
+          sha256sum *.bin > SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: CrossNext-X4Pro-2.0.7-xkcd-wikipedia
+          path: ${{ runner.temp }}/output/
