@@ -11,7 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 3
+          fetch-depth: 1
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -20,6 +20,7 @@ jobs:
         run: |
           set -eu
           mkdir -p "$RUNNER_TEMP/output"
+          git fetch --no-tags --depth=1 origin cff0f52361a2683f0be57094e467fe491c3ebe68
           for revision in cff0f52361a2683f0be57094e467fe491c3ebe68 "$GITHUB_SHA"; do
             git checkout --detach "$revision"
             pio run -e gh_release_x4pro
@@ -34,3 +35,8 @@ jobs:
         with:
           name: CrossNext-X4Pro-2.0.7-xkcd-wikipedia
           path: ${{ runner.temp }}/output/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: CrossNext-X4Pro-debug-symbols
+          path: .pio/build/gh_release_x4pro/firmware.elf
+          include-hidden-files: true
