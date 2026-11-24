@@ -119,7 +119,8 @@ Section::Section(const std::shared_ptr<Epub>& epub, const int spineIndex, GfxRen
     : epub(epub),
       spineIndex(spineIndex),
       renderer(renderer),
-      filePath(epub->getCachePath() + "/sections/" + std::to_string(spineIndex) + ".bin") {}
+      filePath(epub->getCachePath() + "/sections/" + std::to_string(spineIndex) + ".bin"),
+      pageReadMutex(std::in_place) {}
 
 Section::Section(std::string htmlPath, std::string cacheDir, const int index, GfxRenderer& renderer,
                  std::vector<std::string> sectionAnchors, const bool captureFootnotes)
@@ -1137,12 +1138,12 @@ void Section::abandonBuild() {
 std::unique_ptr<Page> Section::readCachedPage(HalFile& input, PageReadBudget* budget, size_t maxBytes) const {
   // Standalone articles can read a page while the incremental layout is active.
   // Use scratch owned by this read so it does not need the EPUB prefetch mutex.
-  if (!epub) {
+  if (!pageReadMutex) {
     const size_t capacity = std::min<size_t>(4096, maxBytes);
     auto scratch = HalMemory::allocatePsram(capacity);
     return Page::deserialize(input, budget, scratch.get(), scratch ? capacity : 0, maxBytes);
   }
-  std::lock_guard<std::mutex> lock(pageReadMutex);
+  std::lock_guard<std::mutex> lock(*pageReadMutex);
   // One reusable 4 KiB PSRAM allocation per Section, including build reads.
   if (!pageReadBufferAttempted) {
     pageReadBufferAttempted = true;

@@ -24,7 +24,7 @@ class Section {
   std::string filePath;
   HalFile file;
   mutable HalMemory::PsramBuffer pageReadBuffer;
-  mutable std::mutex pageReadMutex;
+  mutable std::optional<std::mutex> pageReadMutex;
   mutable bool pageReadBufferAttempted = false;
   std::unique_ptr<Page> readCachedPage(HalFile& input, PageReadBudget* budget = nullptr,
                                        size_t maxBytes = SIZE_MAX) const;

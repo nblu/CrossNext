@@ -439,6 +439,7 @@ void WikipediaActivity::pushHistory() {
 
 void WikipediaActivity::popHistory() {
   if (history_.empty()) {
+    RenderLock lock;
     closeArticle();
     go(View::Search);
     return;
@@ -604,13 +605,16 @@ void WikipediaActivity::enterInstall() {
   // free space: counting it walks the whole FAT (seven seconds on a 16 GB
   // card, before this screen could draw a thing), and the page sizes the copy
   // from the manifest and never reads the number.
-  pack_.writeInstallJson(-1, CROSSPOINT_VERSION, "X4 Pro");
-  closeArticle();
-  if (packOpen_) saveState();
-  pack_.close();
-  packOpen_ = false;
-  view_ = View::Install;
-  interactionsReady_ = false;
+  {
+    RenderLock lock;
+    pack_.writeInstallJson(-1, CROSSPOINT_VERSION, "X4 Pro");
+    closeArticle();
+    if (packOpen_) saveState();
+    pack_.close();
+    packOpen_ = false;
+    view_ = View::Install;
+    interactionsReady_ = false;
+  }
   requestUpdateAndWait();
   if (!Storage.beginUsbDrive()) {
     LOG_ERR(kTag, "USB drive did not start");
@@ -830,7 +834,8 @@ void WikipediaActivity::loop() {
           shelf::leave(renderer, mappedInput);
         }
         return;
-      case View::Article:
+      case View::Article: {
+        RenderLock lock;
         // The edge swipe leaves the article for the main page; the band's
         // chevron is the one that walks the trail back (Mario, 2026-09-11:
         // "the back gesture and the back arrow do different things").
@@ -839,6 +844,7 @@ void WikipediaActivity::loop() {
         closeArticle();
         go(View::Search);
         return;
+      }
       case View::Contents:
         go(View::Article);
         return;
