@@ -117,6 +117,8 @@ void chrome(toybox::Screen& screen, const char* title, const char* trailingLabel
   if (back) {
     header.leadingIcon = fui::bitmapFromIcon(icon_wiki_back_32);
     header.leadingAction = ActionPrevious;
+    // The shared header spaces text from the chevron inside our outlined button.
+    header.leftReserve = 14;
     header.leadingStyles = bandOutlineStyles();
     header.leadingRadius = toybox::kPillRadius / 2;
   }
