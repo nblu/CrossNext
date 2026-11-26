@@ -20,20 +20,20 @@ jobs:
         run: |
           set -eu
           mkdir -p "$RUNNER_TEMP/output"
-          git fetch --no-tags --depth=1 origin cff0f52361a2683f0be57094e467fe491c3ebe68
-          for revision in cff0f52361a2683f0be57094e467fe491c3ebe68 "$GITHUB_SHA"; do
+          git fetch --no-tags --depth=1 origin 395b54d1194f9f5583f974a632e5b89174c9aaf0
+          for revision in 395b54d1194f9f5583f974a632e5b89174c9aaf0 "$GITHUB_SHA"; do
             git checkout --detach "$revision"
             pio run -e gh_release_x4pro
             image=.pio/build/gh_release_x4pro/firmware.bin
             bytes=$(stat -c%s "$image")
-            echo "$revision $bytes bytes, $((0x7f0000-bytes)) bytes free" >> "$GITHUB_STEP_SUMMARY"
+            echo "$revision $bytes bytes, $((0x7f0000-bytes)) bytes free" | tee -a "$GITHUB_STEP_SUMMARY" "$RUNNER_TEMP/output/sizes.txt"
           done
-          cp "$image" "$RUNNER_TEMP/output/CrossNext-X4Pro-2.0.7-xkcd-wikipedia.bin"
+          cp "$image" "$RUNNER_TEMP/output/CrossNext-X4Pro-2.1.0-xkcd-wikipedia.bin"
           cd "$RUNNER_TEMP/output"
           sha256sum *.bin > SHA256SUMS
       - uses: actions/upload-artifact@v4
         with:
-          name: CrossNext-X4Pro-2.0.7-xkcd-wikipedia
+          name: CrossNext-X4Pro-2.1.0-xkcd-wikipedia
           path: ${{ runner.temp }}/output/
       - uses: actions/upload-artifact@v4
         with:
